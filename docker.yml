@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Service étudiants - Backend
+  etudiants-backend:
+    build:
+      context: ./etudiants-service/backend
+      dockerfile: docker_bck_etudiant.dockerfile
+    command: node server.js
+    ports:
+      - "8082:8082"  # Mappe le port 3001 de l'intérieur au port 3001 de l'extérieur
+    volumes:
+      - ./etudiants-service/backend:/app
+    networks:
+      - mynetwork
+
+  # Service étudiants - Frontend
+  etudiants-frontend:
+    build:
+      context: ./etudiants-service/frontend
+      dockerfile: docker_frontend_etudiant.dockerfile
+    ports:
+      - "9002:9002"  # Le frontend React tournera sur le port 3000
+    volumes:
+      - ./etudiants-service/frontend:/app
+    networks:
+      - mynetwork
+    depends_on:
+      - etudiants-backend  # Assure que le backend est prêt avant le frontend
+
+  # Service cours - Backend
+  cours-backend:
+    build:
+      context: ./cours-service/backend
+      dockerfile: docker_bck_cour.dockerfile
+    command: node server.js
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./cours-service/backend:/app
+    networks:
+      - mynetwork
+
+  # Service cours - Frontend
+  cours-frontend:
+    build:
+      context: ./cours-service/frontend
+      dockerfile: docker_frontend_cour.dockerfile
+    ports:
+      - "9001:9001"  # Le frontend React du service "cours" sur le port 3003
+    volumes:
+      - ./cours-service/frontend:/app
+    networks:
+      - mynetwork
+    depends_on:
+      - cours-backend  # Assure que le backend est prêt avant le frontend
+
+networks:
+  mynetwork:
+    driver: bridge
